@@ -1,0 +1,41 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# ---------------------------------------------------------------------------
+# "OrdererOrgs" - Definition of organizations managing orderer nodes
+# ---------------------------------------------------------------------------
+OrdererOrgs:
+  # ---------------------------------------------------------------------------
+  # Orderer
+  # ---------------------------------------------------------------------------
+  - Name: Orderer
+    Domain: hydrogreen.com
+    # ---------------------------------------------------------------------------
+    # "Specs" - See PeerOrgs below for complete description
+    # ---------------------------------------------------------------------------
+    Specs:
+      - Hostname: orderer
+# ---------------------------------------------------------------------------
+# "PeerOrgs" - Definition of organizations managing peer nodes
+# ---------------------------------------------------------------------------
+PeerOrgs:
+  - Name: Org1
+    Domain: org1.hydrogreen.com
+    Template: # 생성될 peer 수
+      Count: 1
+    Users:    # 생성될 기등록 USER 인증서의 수
+      Count: 1
+  - Name: Org2
+    Domain: org2.hydrogreen.com
+    Template:
+      Count: 1
+    Users:
+      Count: 1
+  - Name: Org3
+    Domain: org3.hydrogreen.com
+    Template:
+      Count: 1
+    Users:
+      Count: 1
