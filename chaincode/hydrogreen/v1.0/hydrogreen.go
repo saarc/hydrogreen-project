@@ -21,7 +21,9 @@ type SmartContract struct {
 // ID,  ID, 충전량, 충전 일시, 장소, 금액, 마일리지
 // 2. 주요 기능
 // Init - 현대 충전소 ID와 정보, 인증기관(환경부)의 정보
-// charge - 현대충전소-> 충전소ID, 사용자ID:nil, 충전량, 충전일시, 장소, 금액		사용자 -> 충전소ID, 사용자ID, 충전량, 충전일시, 장소, 금액
+// charge - 
+// 	현대충전소-> 충전소ID, 사용자ID:nil, 충전량, 충전일시, 장소, 금액
+// 	사용자 -> 충전소ID, 사용자ID, 충전량, 충전일시, 장소, 금액
 // history - ID (사용자 ID, 충전소ID)
 // addMileage - ID, 마일리지양
 // subMileage - ID, 마일리지양
@@ -35,6 +37,7 @@ type Charge struct { // 발행인, 어음일련번호, 소유인, 발행일, 만
 	Cplace  string `json:"place"`
 	Price  	string `json:"price"`
 }
+
 type User struct {
 	ID 		string 	`json:"id"`
 	Mileage int		`json:"mileage"`
@@ -44,6 +47,7 @@ type User struct {
 func (s *SmartContract) Init(APIstub shim.ChaincodeStubInterface) sc.Response {
 	// (TODO) 현대자동차 ID
 	// (TODO) 인증기관(환경부)의 정보
+	// (TODO) 마일리지 총량 TOTALMILEAGE, 100000000
 	return shim.Success(nil)
 }
 
@@ -59,11 +63,11 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 		return s.adduser(APIstub, args)
 	} else if function == "history" {
 		return s.history(APIstub, args)
-	}//  else if function == "addmileage" {
+	//  else if function == "addmileage" {
 	// 	return s.addmileage(APIstub, args)
-	// } else if function == "submileage" {
-	// 	return s.submileage(APIstub, args)
-	// }
+	} else if function == "submileage" {
+	 	return s.submileage(APIstub, args)
+	 }
 
 	return shim.Error("Invalid Smart Contract function name.")
 }
@@ -78,11 +82,12 @@ func (s *SmartContract) charge(APIstub shim.ChaincodeStubInterface, args []strin
 	if chargeAsBytes != nil {
 		shim.Error("Duplicated charge ID")
 	}
+	// user 가 존재하지 않으면 
 	userAsBytes, _ := APIstub.GetState(args[1]) // WS 조회
 	if userAsBytes == nil {
-		shim.Error("Not valid user ID")
+		shim.Error("Invalid user ID")
 	}
-	// (TO DO) Pid 가 발행되지 않았다면?
+
 	charge := Charge{args[1],args[2],args[3],args[4],args[5]}
 
 	chargeAsBytes, _ = json.Marshal(charge)
@@ -115,9 +120,32 @@ func (s *SmartContract) adduser(APIstub shim.ChaincodeStubInterface, args []stri
 // func (s *SmartContract) addmileage(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 
 // }
-// func (s *SmartContract) submileage(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+func (s *SmartContract) submileage(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+	if len(args) != 2 { // user id, 차감마일리지
+		return shim.Error("Incorrect number of arguments. Expecting 2")
+	}
 
-// }
+	// USER 마일리지 조회
+	userAsBytes, _ := APIstub.GetState(args[1]) // WS 조회
+	if userAsBytes == nil {
+		shim.Error("Invaild User ID")
+	}
+	user := User{}
+	// UNMARSHAL 해서 수정
+	_ = json.unmarshal(userAsByte, &user)
+
+	mamount, _ := strconv.Atoi(args[1])
+	if user.Mileage < mamount {
+		shim.Error("Not enough mileage in user account")
+	}
+	user.Mileage -= mamount
+
+	// MARSHAL -> PUTSTATE
+	userAsBytes, _ = json.Marshal(user)
+	APIstub.PutState(args[0], userAsBytes)
+
+	return shim.Success(nil)
+}
 // func (s *SmartContract) getmileage(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 
 // }
