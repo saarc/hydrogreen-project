@@ -114,6 +114,10 @@ func (s *SmartContract) charge(APIstub shim.ChaincodeStubInterface, args []strin
 
 	// (TODO) 마일리지 추가 price 비율로 user 에 마일리지를 추가
 	// userAsByte -> Unmarshal 한다음 수정하고 다시 marshal -> putstate user
+	// 1% 마일리지 지급
+	// user -> ummarshal -> 마일리지 추가
+	// manager id -> 마일리지 감소
+	// putstate user, manager
 
 	return shim.Success(nil)
 }
@@ -124,7 +128,7 @@ func (s *SmartContract) adduser(APIstub shim.ChaincodeStubInterface, args []stri
 		return shim.Error("Incorrect number of arguments. Expecting 1")
 	}
 
-	userAsBytes, _ := APIstub.GetState(args[1]) // WS 조회
+	userAsBytes, _ := APIstub.GetState(args[0]) // WS 조회
 	if userAsBytes != nil {
 		shim.Error("Duplicate User ID")
 	}
@@ -150,6 +154,9 @@ func (s *SmartContract) addmileage(APIstub shim.ChaincodeStubInterface, args []s
 	// UNMARSHAL 해서 수정
 	_ = json.Unmarshal(managerAsBytes, &manager)
 
+	if args[0] == managerID_KEY {
+		return shim.Error("Manager ID is not allowed ")
+	}
 	// USER 마일리지 조회
 	userAsBytes, _ := APIstub.GetState(args[0]) // WS 조회
 	if userAsBytes == nil {
@@ -189,6 +196,9 @@ func (s *SmartContract) submileage(APIstub shim.ChaincodeStubInterface, args []s
 	// UNMARSHAL 해서 수정
 	_ = json.Unmarshal(managerAsBytes, &manager)
 
+	if args[0] == managerID_KEY {
+		return shim.Error("Manager ID is not allowed ")
+	}
 	// USER 마일리지 조회
 	userAsBytes, _ := APIstub.GetState(args[0]) // WS 조회
 	if userAsBytes == nil {
