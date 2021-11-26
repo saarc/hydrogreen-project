@@ -44,6 +44,27 @@ app.post('/user', async(req, res)=>{
 
 });
 
+// 마일리지 라우팅
+app.post('/mileage', async(req, res)=>{
+    const customerid = req.body.customerid;
+    const amount = req.body.amount;
+    const mode = req.body.mode;
+ 
+    try {
+        console.log(`mileage post routing - ${customerid}`);
+
+        if(mode == "add")
+            cc_call('addmileage', [customerid, amount], res);
+        else if(mode == "sub")
+            cc_call('submileage', [customerid, amount], res);
+
+    }
+    catch (error) {
+        console.error(`Failed to submit transaction: ${error}`);
+    }
+
+});
+
 // 충전이력생성 라우팅
 app.post('/charge', async(req, res)=>{
     
@@ -105,6 +126,14 @@ async function cc_call(fn_name, args, res){
 
     if(fn_name == 'adduser'){
         result = await contract.submitTransaction('adduser', args[0]);
+        const myobj = {result: "success"}
+        res.status(200).json(myobj)
+    }else if(fn_name == 'addmileage'){
+        result = await contract.submitTransaction('addmileage', args[0], args[1]);
+        const myobj = {result: "success"}
+        res.status(200).json(myobj)
+    }else if(fn_name == 'submileage'){
+        result = await contract.submitTransaction('submileage', args[0], args[1]);
         const myobj = {result: "success"}
         res.status(200).json(myobj)
     }else if(fn_name == 'charge'){
