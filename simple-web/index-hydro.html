@@ -1,0 +1,164 @@
+<head>
+    <!-- Bootstrap include -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- fontawsome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/v4-shims.css">
+
+    <!-- jquery 버전 유의 -->
+    <!-- slim/jquery, 3.1.0 윗 버전에서 ajax가 작동하지 않는 오류 확인 -->
+    <!-- Bootstrap의 CDN을 copy&paste 하되 Line 8의 버전만 3.1.0으로 수정하세요 -->
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0">
+</head>
+
+<body>
+    <div class="container">
+        <i class="fas fa-charging-station" style="font-size: 150px;color:rgb(132, 211, 132)"></i>
+        <h1> 수소충전이력관리 <br>프로토타입 </h1>
+        <hr>
+        
+        <div class="row justify-content-md-center">
+            <div class="col-lg">
+                <div id="new-user-alert"></div>
+                <h3>사용자를 추가합니다</h3>
+                <label  class="form-label">사용자ID:</label><input type="text" id="new-user-id" name="new-user-id" > <br>
+                
+                <button class="btn btn-primary" id="new-user-btn">생성하기</button>
+            </div>   
+        </div>
+        
+        <div class="row justify-content-md-center">
+            <div class="col-lg">
+                <div id="new-alert"></div>
+                <h3>충전이력을 생성 합니다</h3>
+                <label  class="form-label">충전ID:</label><input type="text" id="new-cid" name="new-cid" > <br>
+                <label  class="form-label">사용자ID:</label><input type="text" id="new-cuid" name="new-cuid" > <br>
+                <label  class="form-label">충전일:</label><input type="text" id="new-date" name="new-date" > <br>
+                <label  class="form-label">충전량:</label><input type="text" id="new-amount" name="new-amount" > <br>
+                <label  class="form-label">결제액:</label><input type="text" id="new-price" name="new-price" > <br>
+                <label  class="form-label">충전소:</label><input type="text" id="new-place" name="new-place" > <br>
+                
+                <button class="btn btn-primary" id="new-btn">이력생성하기</button>
+            </div>   
+        </div>
+
+        <div class="row justify-content-md-center">
+            <div class="col-lg">
+                <div id="find-alert"></div>
+                <h3> 충전 이력을 조회합니다</h3>
+                <label  class="form-label">ID:<input type="text" id="qpid" name="qpid"> <br>
+                <button class="btn btn-warning" id="find-btn">이력조회하기</button>
+                
+                <!-- 테이블 안에 row를 하나씩 붙이는 곳 -->
+                <table class="table">
+                    <tbody id="table">
+                    </tbody>
+                </table>
+                
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>    
+	$("#new-user-btn").click(()=>{
+        // new-email이라는 id값을 가지고 있는 input의 value를 가지고 옴
+        const userid = $("#new-user-id").val();
+        const url = "/user"
+        // email이라는 파라메터에 위의 value를 넣음
+        $.post(url, {customerid:userid}, (data,status)=>{
+            // http 상태 코드가 200(success)이라면
+            if(status == "success"){
+                // 성공했다는 alert창을 띄움
+                
+                $('#new-user-alert').empty()
+                $('#new-user-alert').append("<div id='success' class='alert alert-success'>사용자 생성에 성공했습니다!</div>");
+                $('#new-user-alert').fadeIn(2000);
+                $('#new-user-alert').fadeOut(4000);
+            }
+        })
+    })
+    
+    $("#new-btn").click(()=>{
+        // new-email이라는 id값을 가지고 있는 input의 value를 가지고 옴
+        const ncid = $("#new-cid").val();
+        const ncuid = $("#new-cuid").val();
+        const ndate = $("#new-date").val();
+        const namount = $("#new-amount").val();
+        const nprice = $("#new-price").val();
+        const nplace = $("#new-place").val();
+        
+        const url = "/charge"
+
+        // email이라는 파라메터에 위의 value를 넣음
+        $.post(url, {ncid, ncuid, ndate, namount, nprice, nplace}, (data,status)=>{
+            // http 상태 코드가 200(success)이라면
+            if(status == "success"){
+                // 성공했다는 alert창을 띄움
+                
+                $('#new-alert').empty()
+                $('#new-alert').append("<div id='success' class='alert alert-success'>이력생성에 성공했습니다!</div>");
+                $('#new-alert').fadeIn(2000);
+                $('#new-alert').fadeOut(4000);
+            }
+        })
+    })
+    
+    $("#find-btn").click(()=>{
+        const value = $("#qpid").val();
+        const url = "/history"
+        $.get(url, {pid: value}, (data,status)=>{
+            // 조회했을 때 값이 null이 아니면 (일치하는 값이 존재한다면)
+            if(status == "success"){
+                
+                $('#find-alert').empty()
+                $('#find-alert').append("<div id='success' class='alert alert-success'>조회를 성공했습니다!</div>");
+                $('#find-alert').fadeIn(1000);
+                $('#find-alert').fadeOut(4000);
+
+                $('#table').empty();
+
+                parsedData = data;
+                for(var i = 0; i < parsedData.length; i++ ){
+                    $('#table').append("<tr><th scope='row'>txid</th><td>" + parsedData[i].TxId + "</td></tr>")
+                    $('#table').append("<tr><th scope='row'>value</th><td>" + JSON.stringify(parsedData[i].Value) + "</td></tr>")
+                    $('#table').append("<tr><th scope='row'>timestamp</th><td>" + parsedData[i].Timestamp + "</td></tr>")
+                    $('#table').append("<tr><th scope='row'>isdelete</th><td>" + parsedData[i].IsDelete + "</td></tr>")
+                }
+            }        
+        })
+    })
+
+</script>
+
+<!-- styling -->
+<style>
+    .container{
+        width: 100%;
+        height: 500px;
+        margin: 50px 50px;
+        padding: 20px 20px;
+        text-align: center;
+        position: absolute;
+        left: 50%;
+        transform:translateX(-50%);        
+    }
+
+    button{
+        margin: 20px 10px;
+    }
+
+    input{
+        width: 300px;
+        padding: 10px 8px;
+    }
+
+    .col-6{
+        padding: 20px 10px;
+    }
+</style>
